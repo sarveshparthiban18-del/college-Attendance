@@ -21,3 +21,5 @@ def test_login_page_response(client):
     # A login page should respond successfully, or redirect
     # according to the application's session rules.
     assert response.status_code in (200, 302, 303)
+
+
