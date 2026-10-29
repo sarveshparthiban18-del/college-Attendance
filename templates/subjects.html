@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Subjects · AttendancePro Nova{% endblock %}
+{% block breadcrumb %}Subjects{% if selected_department %} / {{ selected_department }}{% endif %}{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <div class="eyebrow">ACADEMIC CATALOG</div>
+    <h1>Subject <span>library.</span></h1>
+    <p>Choose a department to browse its subjects, or add a subject to the correct department.</p>
+  </div>
+</div>
+
+<div class="split-content subjects-layout">
+  <section class="panel form-panel">
+    <div class="panel-head">
+      <div><span class="eyebrow">COURSE SETUP</span><h2>Add a subject</h2></div>
+      <span class="quick-icon blue">▦</span>
+    </div>
+    <form method="post" class="form-stack" id="subject-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Subject code<input name="code" placeholder="e.g. EC301" required maxlength="32"></label>
+      <label>Subject name<input name="name" placeholder="Course title" required maxlength="120"></label>
+      <div class="form-row">
+        <label>Department
+          <select name="department" id="subject-department" required>
+            {% for d in departments %}<option value="{{ d.name }}" {% if selected_department == d.name %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Year
+          <select name="year" id="subject-year" required>
+            <option value="1">Year 1</option><option value="2" selected>Year 2</option><option value="3">Year 3</option><option value="4">Year 4</option>
+          </select>
+        </label>
+      </div>
+      <label>Class visibility
+        <select name="class_name" id="subject-class">
+          <option value="*">All classes in this department</option>
+          {% for c in all_classes %}<option value="{{ c.class_name }}" data-department="{{ c.department }}" data-year="{{ c.year }}" {% if selected_department and c.department != selected_department %}hidden{% endif %}>{{ c.department }} / {{ c.class_name }} · Year {{ c.year }}</option>{% endfor %}
+        </select>
+        <small class="form-hint">Choose a specific class or share this subject with all classes in the department.</small>
+      </label>
+      <label>Faculty name<input name="faculty" placeholder="Faculty / lecturer name"></label>
+      <button class="btn btn-primary btn-wide">Save subject <span>↗</span></button>
+    </form>
+  </section>
+
+  <section class="panel catalog-panel">
+    {% if selected_department %}
+      <div class="panel-head catalog-title-row">
+        <div><span class="eyebrow">DEPARTMENT CATALOG</span><h2>{{ selected_department }} subjects</h2><p class="catalog-subtitle">Showing only courses assigned to {{ selected_department }}.</p></div>
+        <a class="btn btn-secondary" href="{{ url_for('subjects_page') }}">← All departments</a>
+      </div>
+      <div class="subject-grid">
+        {% for s in subjects %}
+          <article class="subject-card">
+            <div class="subject-card-top"><span class="quick-icon {{ ['violet','blue','pink','mint'][loop.index0%4] }}">▦</span><span class="soft-chip">{{ s.code }}</span></div>
+            <h3>{{ s.name }}</h3>
+            <p>{{ s.department }} · {% if s.class_name == '*' %}All classes{% else %}Class {{ s.class_name }}{% endif %} · Year {{ s.year }}</p>
+            <div class="subject-meta"><span>♙ {{ s.faculty or 'Faculty not assigned' }}</span><span>{{ s.records }} records</span></div>
+          </article>
+        {% else %}
+          <div class="empty-inline">No subjects have been added to {{ selected_department }} yet. Use Course Setup to add the first subject.</div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="panel-head">
+        <div><span class="eyebrow">ACTIVE CATALOG</span><h2>Departments</h2></div>
+        <span class="soft-chip">{{ departments|length }} departments</span>
+      </div>
+      <p class="catalog-subtitle">Select a department to open its subject library.</p>
+      <div class="department-grid">
+        {% for d in departments %}
+          <a class="department-card" href="{{ url_for('subjects_page', department=d.name) }}">
+            <span class="department-card-icon {{ ['violet','blue','pink','mint'][loop.index0%4] }}">
+              {% if d.name == 'ECE' %}⌁{% elif d.name == 'CSE' %}⌘{% elif d.name == 'EEE' %}ϟ{% elif d.name == 'AI&DS' %}✳{% else %}▦{% endif %}
+            </span>
+            <span class="department-card-copy"><strong>{{ d.name }}</strong><small>Department subject library</small></span>
+            <span class="department-card-count">{{ d.subject_count }} subjects</span>
+            <span class="department-card-arrow">↗</span>
+          </a>
+        {% else %}
+          <div class="empty-inline">No departments configured yet. Add departments before creating subjects.</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+<script>
+(function () {
+  const dep = document.getElementById('subject-department');
+  const year = document.getElementById('subject-year');
+  const cls = document.getElementById('subject-class');
+  if (!dep || !year || !cls) return;
+  function filterClasses() {
+    let firstValid = '*';
+    let hasCurrent = cls.value === '*';
+    for (const option of cls.options) {
+      if (option.value === '*') continue;
+      const visible = option.dataset.department === dep.value && option.dataset.year === year.value;
+      option.hidden = !visible;
+      option.disabled = !visible;
+      if (visible && firstValid === '*') firstValid = option.value;
+      if (visible && option.value === cls.value) hasCurrent = true;
+    }
+    if (!hasCurrent) cls.value = '*';
+  }
+  dep.addEventListener('change', filterClasses);
+  year.addEventListener('change', filterClasses);
+  filterClasses();
+})();
+</script>
+{% endblock %}

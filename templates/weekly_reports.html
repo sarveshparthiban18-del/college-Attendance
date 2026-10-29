@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Weekly Reports · AttendancePro{% endblock %}
+{% block breadcrumb %}Weekly reports{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">CAMPUS RECORDS</div><h1>Weekly <span>reports.</span></h1><p>Download archived attendance registers for the whole college.</p></div><form method="post" action="{{ url_for('generate_weekly_report_now') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn btn-primary" type="submit">⇩ Generate last 7 days</button></form></div>
+<section class="panel"><div class="panel-head"><div><span class="eyebrow">AUTOMATED ARCHIVE</span><h2>Saved weekly registers</h2></div><span class="soft-chip">CSV · Excel compatible</span></div>
+<p>On Mondays, AttendancePro archives the previous Monday–Sunday register when the app receives a request. For dependable scheduled reports when the app is idle, configure a weekly platform cron job as described in README.</p>
+{% if report_files %}<div class="table-wrap"><table><thead><tr><th>REPORT FILE</th><th>FORMAT</th><th>ACTION</th></tr></thead><tbody>{% for file in report_files %}<tr><td><b>{{ file }}</b></td><td><span class="status status-present">CSV</span></td><td><a class="btn btn-secondary" href="{{ url_for('download_weekly_report', filename=file) }}">Download ↓</a></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-inline">No weekly archive yet. Use “Generate last 7 days” to create the first report.</div>{% endif %}</section>
+<section class="panel"><div class="panel-head"><div><span class="eyebrow">DATA CAPACITY</span><h2>Designed for 4,000+ students</h2></div></div><p>AttendancePro uses indexed SQLite storage for a local/single-server prototype. Keep database and report backups. For multi-user production deployment across a college, move to PostgreSQL and configure automated off-site backups.</p></section>
+{% endblock %}

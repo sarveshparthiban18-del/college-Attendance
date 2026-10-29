@@ -1,0 +1,44 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+attendancepro.db
+instance/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local databases and backups
+*.db
+*.sqlite
+*.sqlite3
+*.db-*
+*.sqlite-*
+
+# Test and coverage output
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
