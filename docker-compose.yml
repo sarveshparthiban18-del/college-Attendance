@@ -1,0 +1,9 @@
+services:
+  attendancepro:
+    image: attendancepro-nova:1.0
+    container_name: attendancepro
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./attendancepro.db:/app/attendancepro.db
+    restart: unless-stopped
