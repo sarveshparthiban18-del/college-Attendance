@@ -42,3 +42,9 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Local pre-migration safety copy
+app-before-postgresql.py
+
+# Generated attendance reports (may contain student data)
+reports/
