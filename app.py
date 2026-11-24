@@ -8,6 +8,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 
 load_dotenv()
+from database import (
+    get_db as db,
+    close_db,
+    INTEGRITY_ERRORS,
+    DATABASE_ERRORS
+)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.getenv('DATABASE_PATH', os.path.join(BASE_DIR, 'attendancepro.db'))
 REPORT_DIR = os.path.join(BASE_DIR, 'reports')
@@ -50,18 +56,7 @@ CREATE TABLE IF NOT EXISTS password_reset_requests (
 );
 '''
 
-def db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(DB_PATH, timeout=10)
-        g.db.execute('PRAGMA busy_timeout=5000')
-        g.db.row_factory = sqlite3.Row
-        g.db.execute('PRAGMA foreign_keys=ON')
-    return g.db
-
-@app.teardown_appcontext
-def close_db(_=None):
-    conn = g.pop('db', None)
-    if conn is not None: conn.close()
+app.teardown_appcontext(close_db)
 
 def log_action(action, details=''):
     db().execute('INSERT INTO audit_logs(actor_id, action, details) VALUES(?,?,?)', (session.get('user_id'), action, details))
